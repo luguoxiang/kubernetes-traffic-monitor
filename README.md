@@ -1,5 +1,7 @@
 # Introduction
-Traffic-Monitor is a tool to monitor kubernetes network traffic between pods(Only HTTP is supported)
+  Traffic-Monitor is is a network sniffer program deployed on each node to collect traffic statistic information bewteen k8s pods. Currently only http traffic can be captured.
+
+  The captured traffic statistic information will be stored in build-in traffic-prometheus service.
 
 # Deploy traffic monitor
 ```
