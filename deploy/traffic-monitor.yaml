@@ -15,10 +15,6 @@ spec:
       - name: traffic-monitor
         image: "luguoxiang/traffic-monitor"
         imagePullPolicy: Always
-        volumeMounts:
-        - name: dockersock
-          mountPath: /var/run/docker.sock
-          readOnly: true
         command:
         - "./traffic-monitor"
         - "-alsologtostderr"   
@@ -27,7 +23,3 @@ spec:
           value: "1.24"
         - name: VIZ_METRICS_PORT
           value: '32466'
-      volumes:
-      - name: dockersock
-        hostPath:
-          path: /var/run/docker.sock
