@@ -19,7 +19,5 @@ spec:
         - "./traffic-monitor"
         - "-alsologtostderr"   
         env:
-        - name: DOCKER_API_VERSION
-          value: "1.24"
         - name: VIZ_METRICS_PORT
           value: '32466'
