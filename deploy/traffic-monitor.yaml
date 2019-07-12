@@ -1,0 +1,33 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: traffic-monitor
+  labels:
+    app: traffic-monitor
+spec:
+  template:
+    metadata:
+      labels:
+        app: traffic-monitor
+    spec:
+      hostNetwork: true
+      containers:
+      - name: traffic-monitor
+        image: "luguoxiang/traffic-monitor"
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: dockersock
+          mountPath: /var/run/docker.sock
+          readOnly: true
+        command:
+        - "./traffic-monitor"
+        - "-alsologtostderr"   
+        env:
+        - name: DOCKER_API_VERSION
+          value: "1.24"
+        - name: VIZ_METRICS_PORT
+          value: '32466'
+      volumes:
+      - name: dockersock
+        hostPath:
+          path: /var/run/docker.sock

@@ -1,0 +1,69 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: traffic-prometheus
+  labels:
+    app: traffic-prometheus
+spec:
+  template:
+    metadata:
+      labels:
+        app: traffic-prometheus
+    spec:
+      containers:
+      - name: traffic-prometheus
+        image: prom/prometheus:v2.0.0
+        args:
+        - "--config.file=/etc/prometheus/conf/prometheus.yml"
+        ports:
+        - containerPort: 9090
+          name: prometheus
+        volumeMounts:
+        - name: prometheus-config-volume
+          mountPath: /etc/prometheus/conf/ 
+      volumes:
+      - name: prometheus-config-volume
+        configMap:
+          name: prometheus-configmap
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: traffic-prometheus
+  labels:
+    app: traffic-prometheus
+spec:
+  type: ClusterIP
+  selector:
+    app: traffic-prometheus
+  ports:
+  - name: prometheus
+    port: 9090
+    targetPort: 9090
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-configmap
+  labels:
+    app: traffic-prometheus
+data:
+  prometheus.yml: |-
+    global:
+      scrape_interval: 3s
+    scrape_configs:
+    - job_name: 'traffic-nodes'
+      kubernetes_sd_configs:
+      - role: node
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_node_name]
+        regex: (.+)
+        target_label: __address__
+        replacement: ${1}:32466
