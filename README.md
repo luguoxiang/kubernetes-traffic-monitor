@@ -1,5 +1,5 @@
 # Introduction
-Traffic-Monitor is a tools to monitor kubernetes network traffic between pods(Only HTTP is supported)
+Traffic-Monitor is a tool to monitor kubernetes network traffic between pods(Only HTTP is supported)
 
 # Deploy traffic monitor
 ```
