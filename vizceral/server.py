@@ -32,19 +32,8 @@ def get_metric(metric, value):
     result['count'] = int(value[1])
     return result
 
-res_time_map = {
-    "0.005" : "0 - 0.005s", 
-    "0.01" : "", 
-    "0.025": "", 
-    "0.05": "", 
-    "0.1": "", 
-    "0.25": "", 
-    "0.5": "", 
-    "1": "", 
-    "2.5": "", 
-    "5": "", 
-    "10": "",
-}
+BUCKETS = ['0', '0.005', '0.01', '0.025', '0.05', '0.1', '0.25', '0.5', '1', '2.5','5', '10', '+Inf']
+
 def build_vizceral_connections(connections_grp):
     result = []
     max_volumns = []
@@ -53,29 +42,35 @@ def build_vizceral_connections(connections_grp):
         
         max_volumns.append(group_inf['count'].max())
   
-        metric = {}
+        metric = {'normal': 0, 'danger': 0, 'warning': 0}
+        annotations = {"source": key[0], "destination": key[1], "ports": ",".join(group_inf['destination_port'].unique())}
+                
         for code, sub_group in group_inf.groupby(['response_code']):
             if 200 <= code < 400:
                 name = 'normal'
             elif 400 <= code < 500:
                 name = 'danger'
             else:
-                name = 'warning'      
-            metric[name] = int(sub_group['count'].sum())
+                name = 'warning'   
+            
+            value = int(sub_group['count'].sum())  
+            
+            metric[name] = metric[name] + value
+            annotations["HTTP %d" % code] = value
 
         res_times = {'0': 0}
         for le, sub_group in group.groupby(['le']):
             res_times[le] = int(sub_group['count'].sum())
             
-        annotations = {"source": key[0], "destination": key[1]}
-        buckets = ['0', '0.005', '0.01', '0.025', '0.05', '0.1', '0.25', '0.5', '1', '2.5','5', '10', '+Inf']
-        for index in range(len(buckets) - 1):
-            last = buckets[index]
-            current = buckets[index + 1]
+
+
+        for index in range(len(BUCKETS) - 1):
+            last = BUCKETS[index]
+            current = BUCKETS[index + 1]
             if last in res_times and current in res_times:
                 value = res_times[current] - res_times[last]
                 if value > 0:
-                    annotations['%s - %s' % (last, current)] = value
+                    annotations['%s - %ss' % (last, current)] = value
                 
         result.append({
                  "source": key[0],
