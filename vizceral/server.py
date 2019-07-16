@@ -11,9 +11,9 @@ import pandas as pd
 # https://stackoverflow.com/questions/27981545/suppress-insecurerequestwarning-unverified-https-request-is-being-made-in-pytho
 requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
 
-PROMETHEUS_HOST = os.getenv("VIZ_PROMETHEUS_HOST", "traffic-prometheus")
+PROMETHEUS_HOST = os.getenv("VIZ_PROMETHEUS_HOST", "localhost")
 PROMETHEUS_PORT = os.getenv("VIZ_PROMETHEUS_PORT", "9090")
-PROMETHEUS_METRIC = "requests_total"
+PROMETHEUS_METRIC = "request_duration_seconds_bucket"
 
 app = Flask(__name__, static_url_path='/static')
 
@@ -27,30 +27,67 @@ def get_metric(metric, value):
     result['src'] = "%s.%s" % (metric['source'], metric['source_ns']) if metric['source'] else "UNKNOWN"
     result['dst'] = "%s.%s" % (metric['destination'], metric['destination_ns'])
     result['response_code'] = int(metric['response_code'])
+    result['le'] = metric['le']
     result['destination_port'] = metric['destination_port']
     result['count'] = int(value[1])
     return result
 
-def build_vizceral_metrics(status):
-    metric = {}
-    for code, group in status:
-        if 200 <= code < 400:
-            key = 'normal'
-        elif 400 <= code < 500:
-            key = 'danger'
-        else:
-            key = 'warning'      
-        metric[key] = int(group['count'].sum())
-    return metric
+res_time_map = {
+    "0.005" : "0 - 0.005s", 
+    "0.01" : "", 
+    "0.025": "", 
+    "0.05": "", 
+    "0.1": "", 
+    "0.25": "", 
+    "0.5": "", 
+    "1": "", 
+    "2.5": "", 
+    "5": "", 
+    "10": "",
+}
+def build_vizceral_connections(connections_grp):
+    result = []
+    max_volumns = []
+    for key, group in connections_grp:
+        group_inf = group[group['le'] == '+Inf']
+        
+        max_volumns.append(group_inf['count'].max())
+  
+        metric = {}
+        for code, sub_group in group_inf.groupby(['response_code']):
+            if 200 <= code < 400:
+                name = 'normal'
+            elif 400 <= code < 500:
+                name = 'danger'
+            else:
+                name = 'warning'      
+            metric[name] = int(sub_group['count'].sum())
 
-def build_vizceral_connections(connections):
-    return [ {
+        res_times = {'0': 0}
+        for le, sub_group in group.groupby(['le']):
+            res_times[le] = int(sub_group['count'].sum())
+            
+        annotations = {"source": key[0], "destination": key[1]}
+        buckets = ['0', '0.005', '0.01', '0.025', '0.05', '0.1', '0.25', '0.5', '1', '2.5','5', '10', '+Inf']
+        for index in range(len(buckets) - 1):
+            last = buckets[index]
+            current = buckets[index + 1]
+            if last in res_times and current in res_times:
+                value = res_times[current] - res_times[last]
+                if value > 0:
+                    annotations['%s - %s' % (last, current)] = value
+                
+        result.append({
                  "source": key[0],
                  "target": key[1],
-                "metrics": build_vizceral_metrics(group.groupby(['response_code'])),
+                "metrics": metric,
+                "annotations" : annotations,
                 "class": "normal",
                 "metadata": {'nodeType': 'deployment'},
-         } for key, group in connections ]
+         })
+   
+        
+    return result, int(max(max_volumns))
 
     
 def build_vizceral_nodes(nodes):
@@ -59,7 +96,7 @@ def build_vizceral_nodes(nodes):
                 "displayName": node,
                 "class": "normal",
                 "metadata": {},
-                "renderer": "focusedChild"
+                "renderer": "region"
     } for node in nodes ]
 
     
@@ -70,13 +107,15 @@ def build_vizceral_graph(result):
     data = pd.DataFrame([ get_metric(item['metric'], item['value']) for item in result["data"]['result']])
     
     nodes = set(data['src'].unique()) | set(data['dst'].unique())
-    connections = data.groupby(['src','dst'])
+
+    connections, maxVolume = build_vizceral_connections(data.groupby(['src','dst']))
     
     return {"renderer": "region",
              "name": "graph",
+             "maxVolume": maxVolume * 2 + 20,
              "serverUpdateTime":int(round(time.time() * 1000)),
              "nodes": build_vizceral_nodes(nodes),
-             "connections": build_vizceral_connections(connections)}
+             "connections": connections}
 
     
 @app.route('/vizceral')

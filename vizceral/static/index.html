@@ -5,6 +5,7 @@
         var vizceral
         function loadVizceral() {
                 vizceral = new Vizceral.default(document.getElementById('vizceral'));
+             
                 var xhr = new XMLHttpRequest();
                 xhr.open('GET', "/vizceral", true);
                 xhr.responseType = 'json';
@@ -15,9 +16,7 @@
                         vizceral.on('objectHighlighted', object => {
                             if (object.type === 'connection') {
                                 alert(JSON.stringify(object.annotations, null, 4))
-                            } else if (object.type === 'node') {
-                                alert(JSON.stringify(object.route, null, 4))
-                            }
+                            } 
                         });
                         vizceral.setView();
                         vizceral.animate();
@@ -28,7 +27,7 @@
                 xhr.send();
         }
     </script>
-    <title>Example with Sample Data</title>
+    <title>Traffic Data</title>
   </head>
   <body onload='loadVizceral()'>
     <canvas id='vizceral'></canvas>
