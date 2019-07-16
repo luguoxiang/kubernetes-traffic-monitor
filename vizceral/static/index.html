@@ -1,0 +1,36 @@
+<html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vizceral/4.4.3/vizceral.min.js"></script>
+    <script>
+        var vizceral
+        function loadVizceral() {
+                vizceral = new Vizceral.default(document.getElementById('vizceral'));
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', "/vizceral", true);
+                xhr.responseType = 'json';
+                xhr.onload = function() {
+                    var status = xhr.status;
+                    if (status === 200) {
+                        vizceral.updateData(xhr.response)
+                        vizceral.on('objectHighlighted', object => {
+                            if (object.type === 'connection') {
+                                alert(JSON.stringify(object.annotations, null, 4))
+                            } else if (object.type === 'node') {
+                                alert(JSON.stringify(object.route, null, 4))
+                            }
+                        });
+                        vizceral.setView();
+                        vizceral.animate();
+                    } else {
+                        alert(xhr.response)
+                    }
+                }
+                xhr.send();
+        }
+    </script>
+    <title>Example with Sample Data</title>
+  </head>
+  <body onload='loadVizceral()'>
+    <canvas id='vizceral'></canvas>
+  </body>
+</html>

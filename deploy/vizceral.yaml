@@ -1,0 +1,42 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: traffic-vizceral
+  labels:
+    app: traffic_vizceral
+spec:
+  template:
+    metadata:
+      labels:
+        app: traffic_vizceral
+    spec:
+      containers:
+      - name: traffic-vizceral
+        image: luguoxiang/traffic-vizceral
+        imagePullPolicy: Always
+        env:
+        - name: VIZ_PROMETHEUS_HOST
+          value: 'traffic-prometheus'
+        - name: VIZ_PROMETHEUS_PORT
+          value: '9090'          
+        ports:
+        - containerPort: 8080
+          name: http
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: traffic-vizceral
+  labels:
+    app: traffic_vizceral
+spec:
+  type: NodePort
+  ports:
+  - name: backend
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: traffic_vizceral
+
