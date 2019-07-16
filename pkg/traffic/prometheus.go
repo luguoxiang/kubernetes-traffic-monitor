@@ -1,6 +1,7 @@
 package traffic
 
 import (
+	"fmt"
 	"github.com/golang/glog"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -16,7 +17,8 @@ const (
 	SOURCE_NAMESPACE         = "source_ns"
 	DESTINATION_NAMESPACE    = "destination_ns"
 	HTTP_METHOD              = "method"
-	HTTP_URL                 = "url"
+	HTTP_STATUS              = "response_code"
+	DESTINATION_PORT         = "destination_port"
 )
 
 var (
@@ -24,12 +26,12 @@ var (
 		Name:    PROMETHEUS_DURATION_NAME,
 		Help:    "A histogram of the API HTTP request durations in seconds.",
 		Buckets: []float64{0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10},
-	}, []string{SOURCE, SOURCE_NAMESPACE, DESTINATION, DESTINATION_NAMESPACE, HTTP_METHOD, HTTP_URL})
+	}, []string{SOURCE, SOURCE_NAMESPACE, DESTINATION, DESTINATION_NAMESPACE, HTTP_METHOD, HTTP_STATUS, DESTINATION_PORT})
 
 	requestCount = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Name: PROMETHEUS_COUNT_NAME,
 		Help: "API HTTP request count.",
-	}, []string{SOURCE, SOURCE_NAMESPACE, DESTINATION, DESTINATION_NAMESPACE, HTTP_METHOD, HTTP_URL})
+	}, []string{SOURCE, SOURCE_NAMESPACE, DESTINATION, DESTINATION_NAMESPACE, HTTP_METHOD, HTTP_STATUS, DESTINATION_PORT})
 )
 
 func init() {
@@ -51,7 +53,8 @@ func SavePacket(info *TrafficInfo) {
 		DESTINATION:           info.Dst,
 		DESTINATION_NAMESPACE: info.DstNS,
 		HTTP_METHOD:           info.Method,
-		HTTP_URL:              info.Url,
+		HTTP_STATUS:           info.Status,
+		DESTINATION_PORT:      fmt.Sprintf("%d", info.DstPort),
 	}
 	requestCount.With(labels).Inc()
 	requestHistogram.With(labels).Observe(info.GetDurationTimeMiliSeconds() / 1000)
