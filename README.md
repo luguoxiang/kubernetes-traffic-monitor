@@ -25,4 +25,9 @@ while true; do curl http://localhost:9080/productpage; sleep 1;done
 kubectl port-forward deployments/traffic-prometheus 9090 &
 curl localhost:9090/api/v1/query?query=requests_total|jq
 ```
-
+# Show traffic by vizceral
+```
+kubectl apply -f deploy/vizceral.yaml
+VIZCERAL_PORT=$(kubectl get svc traffic-vizceral -o=jsonpath="{.spec.ports[0].nodePort}")
+browse http://localhost:$VIZCERAL_PORT/static/index.html
+```
