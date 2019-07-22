@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
-	"github.com/luguoxiang/traffic-monitor/pkg/kubernetes"
-	"github.com/luguoxiang/traffic-monitor/pkg/traffic"
+	"github.com/luguoxiang/kubernetes-traffic-monitor/pkg/kubernetes"
+	"github.com/luguoxiang/kubernetes-traffic-monitor/pkg/traffic"
 )
 
 func main() {

@@ -7,7 +7,7 @@ RUN apk add libpcap
 RUN apk add libpcap-dev
 RUN apk add git
 RUN apk add curl
-ENV PROJECT_DIR /go/src/github.com/luguoxiang/traffic-monitor
+ENV PROJECT_DIR /go/src/github.com/luguoxiang/kubernetes-traffic-monitor
 RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh |sh
 RUN mkdir -p ${PROJECT_DIR}/cmd
 ENV GOPATH /go
@@ -25,4 +25,4 @@ RUN apk update
 RUN apk add libpcap
 RUN apk add tcpdump
 WORKDIR /app
-COPY --from=build-env /go/src/github.com/luguoxiang/traffic-monitor/traffic-monitor /app/
+COPY --from=build-env /go/src/github.com/luguoxiang/kubernetes-traffic-monitor/traffic-monitor /app/

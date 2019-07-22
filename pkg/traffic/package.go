@@ -3,7 +3,7 @@ package traffic
 import (
 	"fmt"
 	"github.com/golang/glog"
-	"github.com/luguoxiang/traffic-monitor/pkg/kubernetes"
+	"github.com/luguoxiang/kubernetes-traffic-monitor/pkg/kubernetes"
 	"net"
 	"regexp"
 	"time"
