@@ -58,10 +58,6 @@ func TestWatch(t *testing.T) {
 	assert.Equal(t, serviceInfo.Ports[0].TargetPort, uint32(456))
 	assert.Equal(t, serviceInfo.Ports[0].Name, "http")
 
-	foundServiceInfo, port := k8sManager.GetServiceFromPodIP("10.1.1.1", 123)
-	assert.Equal(t, serviceInfo, foundServiceInfo)
-	assert.Equal(t, serviceInfo.Ports[0], port)
-
 	pods := k8sManager.GetPodsForService(serviceInfo)
 	assert.Equal(t, len(pods), 1)
 	assert.Equal(t, pods[0], podInfo)
