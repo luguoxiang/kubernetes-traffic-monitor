@@ -104,7 +104,9 @@ func (manager *TrafficManager) GetRequest(srcIp string, srcPort uint32, dstIp st
 					}
 					return nil, true
 				}
-				firstMatch = request
+				if firstMatch == nil {
+					firstMatch = request
+				}
 			} else if srcIp == "" && request.Src == "" {
 				return request, false
 			} else if srcIp == request.SrcIP {

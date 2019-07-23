@@ -109,8 +109,8 @@ func TestTrafficManagerGetRequest(t *testing.T) {
 
 	t1.TcpResponseTimestamp = []byte{1, 2, 4}
 	t2.TcpResponseTimestamp = []byte{1, 2, 4}
-	//should match oldest response
+	//should match latest response(most recently added)
 	result, duplicate = tm.GetRequest("10.1.1.1", 123, "10.1.2.2", 456, []byte{1, 2, 3})
-	assert.Equal(t, result, &t1)
+	assert.Equal(t, result, &t2)
 	assert.False(t, duplicate)
 }
