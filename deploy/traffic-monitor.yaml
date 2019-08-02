@@ -13,7 +13,7 @@ spec:
       hostNetwork: true
       containers:
       - name: traffic-monitor
-        image: "luguoxiang/traffic-monitor"
+        image: "luguoxiang/traffic-monitor:1.0"
         imagePullPolicy: Always
         command:
         - "./traffic-monitor"

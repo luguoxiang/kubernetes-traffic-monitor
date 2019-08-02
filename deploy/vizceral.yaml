@@ -12,7 +12,7 @@ spec:
     spec:
       containers:
       - name: traffic-vizceral
-        image: luguoxiang/traffic-vizceral
+        image: "luguoxiang/traffic-vizceral:1.0"
         imagePullPolicy: Always
         env:
         - name: VIZ_PROMETHEUS_HOST

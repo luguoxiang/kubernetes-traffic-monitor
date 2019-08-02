@@ -1,3 +1,5 @@
+VERSION=1.0
+
 vendor:
 	dep ensure -vendor-only -v
 
@@ -10,10 +12,10 @@ build: vendor
 test: vendor
 	go test -v github.com/luguoxiang/kubernetes-traffic-monitor/pkg/...
 
-build.images: 
-	(cd vizceral;make build.images)
-	docker build -t luguoxiang/traffic-monitor .
+build.images.vizceral: 
+	(cd vizceral;docker build -t luguoxiang/traffic-vizceral:${VERSION} .;docker push luguoxiang/traffic-vizceral:${VERSION})
 
-push.images:
-	(cd vizceral;make push.images)
-	docker push luguoxiang/traffic-monitor
+build.images: 
+	docker build -t luguoxiang/traffic-monitor:${VERSION} .
+	docker push luguoxiang/traffic-monitor:${VERSION}
+
