@@ -155,6 +155,10 @@ func getDefaultDevice(aPodIp net.IP) string {
 		}
 		ipMask := net.IPv4Mask(byte(number3), byte(number2), byte(number1), byte(number0))
 
+		if number3 ==255 && number2==255 && number1==255 && number0 ==255 {
+			glog.Infof("ignore %s %s", items[0], ip.String())
+			continue
+		}
 		if ip.Equal(aPodIp.Mask(ipMask)) && maxMask < (number3+number2+number1+number0) {
 			maxMask = (number3 + number2 + number1 + number0)
 			device = items[0]
