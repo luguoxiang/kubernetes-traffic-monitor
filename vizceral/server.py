@@ -22,7 +22,7 @@ logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger("traffic-monitor")
 
 
-def get_metric(metric, value):
+def get_metric(item):
     if 'metric' not in item or 'value' not in item:
         return {}
     metric = item['metric']
