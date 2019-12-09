@@ -20,7 +20,7 @@ type PacketManager struct {
 	trafficManager TrafficManager
 }
 
-func NewPacketManager(device string, k8sManager *kubernetes.K8sResourceManager) (*PacketManager, error) {
+func NewPacketManager(k8sManager *kubernetes.K8sResourceManager) (*PacketManager, error) {
 	k8sIp := k8sManager.GetK8sIP()
 	if k8sIp == "" {
 		glog.Warning("failed to get ip of 'kubernetes'")
@@ -37,7 +37,7 @@ func NewPacketManager(device string, k8sManager *kubernetes.K8sResourceManager) 
 	}
 	return &PacketManager{
 		k8sManager:  k8sManager,
-		pCapManager: NewPCapManager(device, k8sIp, net.ParseIP(ip)),
+		pCapManager: NewPCapManager(k8sIp, net.ParseIP(ip)),
 	}, nil
 
 }

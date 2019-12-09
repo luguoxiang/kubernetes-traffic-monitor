@@ -7,8 +7,6 @@ import (
 )
 
 func main() {
-	var device string
-	flag.StringVar(&device, "device", "", "network device been sniffered")
 	flag.Parse()
 
 	k8sManager, err := kubernetes.NewK8sResourceManager()
@@ -23,7 +21,7 @@ func main() {
 	go k8sManager.WatchStatefulSets(stopper, k8sManager)
 	go k8sManager.WatchDaemonSets(stopper, k8sManager)
 
-	packetManager, err := traffic.NewPacketManager(device, k8sManager)
+	packetManager, err := traffic.NewPacketManager(k8sManager)
 	if err != nil {
 		panic(err.Error())
 	}

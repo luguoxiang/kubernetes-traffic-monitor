@@ -1,0 +1,35 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: test-ingress
+spec:
+  backend:
+    serviceName: traffic-prometheus
+    servicePort: 9090
+  rules:
+  - http:
+      paths:
+      - path: /vizceral
+        backend:
+          serviceName: traffic-vizceral
+          servicePort: 8080          
+      - path: /static
+        backend:
+          serviceName: traffic-vizceral
+          servicePort: 8080          
+      - path: /productpage
+        backend:
+          serviceName: productpage
+          servicePort: 9080          
+      - path: /reviews
+        backend:
+          serviceName: reviews
+          servicePort: 9080
+      - path: /ratings
+        backend:
+          serviceName: ratings
+          servicePort: 9080
+      - path: /api/v1
+        backend:
+          serviceName: traffic-prometheus
+          servicePort: 9090   

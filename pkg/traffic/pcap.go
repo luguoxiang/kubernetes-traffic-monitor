@@ -22,7 +22,6 @@ type PCapManager struct {
 	dockerNetIP   net.IP
 	dockerNetMask net.IPMask
 	pcapFilter    string
-	device        string
 }
 
 func (manager *PCapManager) InsideLocalPodIPRange(dstIp string) bool {
@@ -160,7 +159,7 @@ func getDefaultDevice(aPodIp net.IP) string {
 			continue
 		}
 		if ip.Equal(aPodIp.Mask(ipMask)) && maxMask < (number3+number2+number1+number0) {
-			maxMask = (number3 + number2 + number1 + number0)
+			maxMask = number3 + number2 + number0 + number1
 			device = items[0]
 		}
 		glog.Infof("%s %s %s", items[0], ip.String(), ipMask.String())
@@ -171,10 +170,8 @@ func getDefaultDevice(aPodIp net.IP) string {
 
 type PacketHandler func(packet *PacketInfo)
 
-func NewPCapManager(device string, k8sIp string, aPodIp net.IP) *PCapManager {
-	if device == "" {
-		device = getDefaultDevice(aPodIp)
-	}
+func NewPCapManager(k8sIp string, aPodIp net.IP) *PCapManager {
+	device := getDefaultDevice(aPodIp)
 
 	var filters []string
 	//pcap is only able to match data size of either 1, 2 or 4 bytes
@@ -227,7 +224,6 @@ func NewPCapManager(device string, k8sIp string, aPodIp net.IP) *PCapManager {
 	glog.Infof("docker ip: %s, mask: %s", dockerNetIP.String(), dockerNetMask.String())
 	return &PCapManager{
 		pcapFilter:    pcapFilter,
-		device:        device,
 		dockerNetIP:   dockerNetIP,
 		dockerNetMask: dockerNetMask,
 	}
@@ -235,7 +231,7 @@ func NewPCapManager(device string, k8sIp string, aPodIp net.IP) *PCapManager {
 
 func (manager *PCapManager) Run(handler PacketHandler) {
 
-	handle, err := pcap.OpenLive(manager.device, 1024, true, pcap.BlockForever)
+	handle, err := pcap.OpenLive("any", 1024, true, pcap.BlockForever)
 	if err != nil {
 		panic(err)
 	}
@@ -254,7 +250,7 @@ func (manager *PCapManager) Run(handler PacketHandler) {
 		handle.Close()
 	}()
 
-	glog.Infof("pcap.OpenLive device=%s, filter = %s", manager.device, manager.pcapFilter)
+	glog.Infof("pcap.OpenLive device=any, filter = %s",manager.pcapFilter)
 
 	packetCh := make(chan *PacketInfo, 1000)
 	go func() {

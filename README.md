@@ -5,8 +5,8 @@ The captured traffic statistic information will be stored in build-in traffic-pr
 
 # Deploy traffic monitor
 ```
-kubectl apply -f deploy/traffic-monitor.yaml
-kubectl apply -f deploy/prometheus.yaml
+git clone https://github.com/luguoxiang/kubernetes-traffic-manager.git
+helm install --set monitor.enabled=true --name kubernetes-traffic-manager helm/kubernetes-traffic-manager
 ```
 
 # Deploy sample application
@@ -16,18 +16,17 @@ kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.0/sampl
 
 # Generate traffic
 ```
-kubectl port-forward deployments/productpage-v1 9080 &
-while true; do curl http://localhost:9080/productpage; sleep 1;done
+kubectl apply -f deploy/vizceral.yaml
+kubectl apply -f vizceral/ingress.yaml
+INGRESS_HOST=`kubectl get svc traffic-ingress -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'`
+while true; do curl http://${INGRESS_HOST}/productpage; sleep 1;done
 ```
 
 # Get traffic from promethues
 ```
-kubectl port-forward deployments/traffic-prometheus 9090 &
-curl localhost:9090/api/v1/query?query=requests_total|jq
+curl ${INGRESS_HOST}/api/v1/query?query=requests_total|jq
 ```
 # Show traffic by vizceral
 ```
-kubectl apply -f deploy/vizceral.yaml
-VIZCERAL_PORT=$(kubectl get svc traffic-vizceral -o=jsonpath="{.spec.ports[0].nodePort}")
-browse http://localhost:$VIZCERAL_PORT/static/index.html
+browse http://${INGRESS_HOST}/static/index.html
 ```
