@@ -23,6 +23,10 @@ LOGGER = logging.getLogger("traffic-monitor")
 
 
 def get_metric(metric, value):
+    if 'metric' not in item or 'value' not in item:
+        return {}
+    metric = item['metric']
+    value = item['value']
     result = {}
     result['src'] = "%s.%s" % (metric['source'], metric['source_ns']) if metric['source'] else "UNKNOWN"
     result['dst'] = "%s.%s" % (metric['destination'], metric['destination_ns'])
@@ -98,8 +102,10 @@ def build_vizceral_nodes(nodes):
 def build_vizceral_graph(result):
     if 'data' not in result or 'result' not in result["data"]:
         return {}
+    if not result["data"]['result']:
+        return {}
     
-    data = pd.DataFrame([ get_metric(item['metric'], item['value']) for item in result["data"]['result']])
+    data = pd.DataFrame([ get_metric(item) for item in result["data"]['result']])
     
     nodes = set(data['src'].unique()) | set(data['dst'].unique())
 
