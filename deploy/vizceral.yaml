@@ -32,7 +32,7 @@ metadata:
   labels:
     app: traffic_vizceral
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
   - name: backend
     port: 8080

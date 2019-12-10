@@ -231,7 +231,7 @@ func NewPCapManager(k8sIp string, aPodIp net.IP) *PCapManager {
 
 func (manager *PCapManager) Run(handler PacketHandler) {
 
-	handle, err := pcap.OpenLive("any", 1024, true, pcap.BlockForever)
+	handle, err := pcap.OpenLive("any", 1024, false, pcap.BlockForever)
 	if err != nil {
 		panic(err)
 	}
