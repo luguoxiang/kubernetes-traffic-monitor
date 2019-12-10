@@ -16,8 +16,7 @@ kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.0/sampl
 
 # Generate traffic
 ```
-kubectl apply -f deploy/vizceral.yaml
-kubectl apply -f vizceral/ingress.yaml
+kubectl apply -f deploy/ingress.yaml
 INGRESS_HOST=`kubectl get svc traffic-ingress -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'`
 while true; do curl http://${INGRESS_HOST}/productpage; sleep 1;done
 ```
@@ -28,5 +27,6 @@ curl ${INGRESS_HOST}/api/v1/query?query=requests_total|jq
 ```
 # Show traffic by vizceral
 ```
+kubectl apply -f deploy/vizceral.yaml
 browse http://${INGRESS_HOST}/static/index.html
 ```
